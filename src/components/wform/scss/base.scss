@@ -1,0 +1,98 @@
+
+.editSecTitle{
+  font-size: 16px;
+  color: #16263D;
+  margin: 20px 0;
+  .add{
+    color: #409eff;
+    font-size: 14px;
+    margin-left: 10px;
+    cursor: pointer;
+  }
+}
+.tab-btn{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  margin: 10px 0;
+}
+.popup{
+  position:fixed;
+  top: 60px;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.363);
+  z-index: 999;
+}
+// 无法使用表单验证的元素样式
+.rulesBox{
+  margin-bottom: 22px;
+  .rulesTitle{
+    font-size: 14px;
+    color: #606266;
+    line-height:40px;
+    span{
+      color: #f56c6c;
+    }
+  }
+  .btn{
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    button{
+      margin-top: 10px;
+    }
+  }
+}
+.el-form-item.is-required .el-form-item__label:before{
+  content: '*';
+  color:#f56c6c;
+  margin-right: 4px;
+}
+// 编辑器
+
+.ckeditor-container {
+  .ck-content {
+    padding: 20px;
+    min-height: 300px;
+  }
+  h2, h3, h4 {
+    display: block;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+  }
+  h2 {
+    font-size: 1.5em;
+    margin-block-start: 0.83em;
+    margin-block-end: 0.83em;
+  }
+  h3 {
+    font-size: 1.17em;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+  }
+  h4 {
+    margin-block-start: 1.33em;
+    margin-block-end: 1.33em;
+  }
+  ul {
+    list-style-type: disc;
+    margin: 0;
+  }
+  ol {
+    list-style-type: decimal;
+    margin: 0;
+  }
+  * {
+    line-height: 1.5em;
+  }
+  p {
+    margin-bottom: 1.3em;
+  }
+  a {
+    text-decoration: underline;
+  }
+}

@@ -1,0 +1,8 @@
+@charset "UTF-8";
+
+/* 重置全局样式 */
+
+$--color-success: #58a942;
+$--font-path: '~element-ui/lib/theme-chalk/fonts';
+// 使用~符号，scss编译时找不到文件路径
+@import '../../../node_modules/element-ui/packages/theme-chalk/src/index';

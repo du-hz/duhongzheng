@@ -1,0 +1,77 @@
+/deep/ .el-dialog {
+  border-radius: 10px;
+  min-width: 500px;
+}
+/deep/ .el-dialog__header {
+  border-bottom: 1px solid #ccc;
+}
+/deep/ .el-dialog__body {
+  padding: 40px;
+}
+/deep/ .el-dialog__footer {
+  padding: 15px 40px;
+}
+.el-descriptions {
+  // padding-bottom: 10px;
+  .el-descriptions__header {
+    font-size: 16px;
+    color: #000;
+  }
+  .el-descriptions__body {
+    display: flex;
+    flex-flow: row wrap;
+    align-content: flex-start;
+    padding: 8px 0;;
+    li {
+      flex: 0 0 50%;
+      box-sizing: border-box;
+      padding-bottom: 5px;
+      display: inline-table;
+      span:nth-child(1) {
+        display: inline-block;
+        width: 30%;
+        color: #7f7f7c;
+        text-align: right;
+        vertical-align: top;
+      }
+      span:nth-child(2) {
+        display: inline-block;
+        width: 67%;
+        color: #000;
+        padding-left: 5px;
+      }
+      .vertical-middle {
+        vertical-align: middle!important;;
+      }
+      /deep/ .el-input__inner {
+        height: 35px;
+      }
+    }
+  }
+}
+
+
+// 上传logo
+/deep/ .avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+/deep/ .avatar-uploader .el-upload:hover {
+  border-color: #409EFF;
+}
+/deep/ .avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 120px;
+  height: 120px;
+  line-height: 120px;
+  text-align: center;
+}
+/deep/ .avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}

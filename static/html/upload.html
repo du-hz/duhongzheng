@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name=viewport content="width=device-width,initial-scale=1,user-scalable=0,viewport-fit=cover">
+  <meta name=applicable-device content=mobile>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <title>文件上传</title>
+</head>
+<body>
+<div class="upload-container" id="uploadContainer">
+  <el-button size="medium" type="primary" @click="getHistory">查看历史提交记录</el-button>
+  <div class="tip" :class="fileList.length === 0 ? 'show' : 'hide'">请选择上传文件，然后提交</div>
+  <el-upload
+    class="upload-demo"
+    ref="upload"
+    action="http://upload.qiniup.com/"
+    :multiple="true"
+    :before-upload="beforeUpload"
+    :on-change="handleChange"
+    :on-success="uploadSuccess"
+    :file-list="fileList"
+    :auto-upload="false"
+    :data="uploadData">
+    <el-button size="medium" slot="trigger" type="primary">选择文件</el-button>
+    <el-button size="medium" @click="clearUpload" type="info">清空</el-button>
+    <el-button size="medium" class="submit" type="danger" @click="submitUpload">提 交</el-button>
+  </el-upload>
+  <!-- 历史记录弹窗 -->
+  <el-dialog
+    title="历史记录"
+    :visible.sync="showDialog"
+    width="30%"
+    center>
+    <div class="history-wrap">
+      <div class="history-list">
+        <div class="history-item" v-for="(item, index) in historyFileList" :key="index">
+          <div class="file-name">{{ item.frtName }}</div>
+          <div class="time">{{ item.frtTime }}</div>
+        </div>
+      </div>
+    </div>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="showDialog = false" type="primary">关 闭</el-button>
+    </span>
+  </el-dialog>
+</div>
+</body>
+<!-- 先引入 Vue -->
+<script src="https://cdn1.moore.ren/static/common/vue/vue.min.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="http://cdn1.moore.ren/static/common/jquery/jquery-3.3.1.min.js"></script>
+<script>
+  var vm = new Vue({
+    el: '#uploadContainer',
+    created() {
+      this.getQiniuUploadToken()
+    },
+    data() {
+      return {
+        env: window.location.hostname === 'adminp.mooreelite.com' ? 'prod' : 'dev',
+        serverUrl: window.location.hostname === 'adminp.mooreelite.com' ? 'http://adminp.mooreelite.com' : 'http://adminp.dev.mooreelite.com',
+        userToken: window.location.hostname === 'adminp.mooreelite.com' ?
+          'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMDE5LTA2LTE0IiwiYWRtaW5JZCI6MSwiaWF0IjoxNTYwNDkzNTEyLCJleHAiOjE1NjgyNjk1MTJ9.85h6wgsQPNdIgjWUW5KRYlUCCFejTHW6-Nhj1WZouoo' :
+          'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMDE5LTA2LTA0IiwiYWRtaW5JZCI6MjA0LCJpYXQiOjE1NTk2MTcwMzksImV4cCI6MTU2MzA3MzAzOX0.pUWp5XiA1v4GHEIFgMSz0UK3ODGnhJUEtjIBFxmTorI',
+        uploadToken: '',
+        fileList: [],
+        uploadData: {
+          token: '',
+          key: ''
+        },
+        result: [],
+        showDialog: false,
+        historyFileList: []
+      }
+    },
+    methods: {
+      getQiniuUploadToken() {
+        let _vue = this
+        $.ajax({
+          headers: {
+            'Authorization': 'Bearer ' + this.userToken
+          },
+          url: this.serverUrl + '/api/v1.0/qiniu/token/img',
+          type: 'POST',
+          data: {},
+          success: function(res) {
+            _vue.uploadToken = res.data.token
+          }
+        })
+      },
+      handleChange(file, fileList) {
+        this.fileList = fileList
+      },
+      submitUpload() {
+        if (this.fileList.length > 0) {
+          this.$refs.upload.submit()
+        } else {
+          this.$message({
+            type: 'error',
+            message: '请选择上传文件',
+            center: true
+          })
+        }
+      },
+      beforeUpload(file) {
+        let _vue = this
+        let suffixArr = ['xls', 'xlsx']
+        let fileArr = file.name.split('.')
+        let fileSuffix = fileArr[1].toLowerCase()
+        let key = 'wip_report/' + fileArr[0] + '_' + (new Date().getTime()) + '.' + fileArr[1].toLowerCase()
+        if (file.size / 1024 / 1024 >= 10) {
+          this.$message({
+            type: 'error',
+            message: '文件大小需小于10M，请重新上传',
+            center: true
+          })
+          return false
+        } else if (suffixArr.indexOf(fileSuffix) === -1) {
+          this.$message({
+            type: 'error',
+            message: '仅支持xls,xlsx格式文件，请重新上传',
+            center: true
+          })
+          return false
+        } else {
+          let _vue = this
+          _vue.uploadData.token = _vue.uploadToken
+          _vue.uploadData.key = key
+        }
+      },
+      uploadSuccess (res, file, fileList) {
+        var _vue = this
+        this.result.push(res)
+        if (this.result.length === fileList.length) {
+          // 上传结果传给后台
+          let filePathArr = []
+          for (let i = 0; i < this.result.length; i++) {
+            filePathArr.push({
+              filePath: this.result[i].key
+            })
+          }
+          $.ajax({
+            headers: {
+              'Authorization': 'Bearer ' + this.userToken
+            },
+            url: this.serverUrl + '/api/v1.0/fileUpload/file/saveUploadPath',
+            type: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(filePathArr),
+            success: function(res) {
+              console.log('提交成功')
+              // 提前检查文件是否可以解析成功
+              $.ajax({
+                headers: {
+                  'Authorization': 'Bearer ' + this.userToken
+                },
+                url: _vue.serverUrl + '/api/v1.0/fileUpload/file/validtionFile',
+                type: 'GET',
+                contentType: 'application/json',
+                success: function(){
+                  // 解析成功
+                  _vue.$message({
+                    type: 'success',
+                    message: '文件上传成功',
+                    center: true
+                  })
+                  _vue.fileList = []
+                  _vue.result = []
+                  filePathArr = []
+                  window.setTimeout(() => {
+                    window.location.reload()
+                  }, 1000)
+                },
+                error: function(err) {
+                  // 解析失败，需要重新上传
+                  console.log(err)
+                  let arr = err.responseJSON.error.errors
+                  let titles = ''
+                  for (let i = 0; i < arr.length; i++) {
+                    titles += arr[i].message + ' '
+                  }
+                  console.log(titles)
+                  _vue.$alert(titles + '\n文件标题或内容不符合要求，请检查并重新上传文件', {
+                    title: '提示',
+                    type: 'error',
+                    callback: action => {
+                      _vue.fileList = []
+                      _vue.result = []
+                      filePathArr = []
+                    }
+                  })
+                }
+              })
+            },
+            error: function(err) {
+              console.log(err)
+              let arr = err.responseJSON.error.errors
+              let titles = ''
+              for (let i = 0; i < arr.length; i++) {
+                titles += arr[i].message + ' '
+              }
+              console.log(titles)
+              _vue.$alert(titles + '\n文件标题或内容不符合要求，请检查并重新上传文件', {
+                title: '提示',
+                type: 'error',
+                callback: action => {
+                  _vue.fileList = []
+                  _vue.result = []
+                  filePathArr = []
+                }
+              })
+            }
+          })
+        }
+      },
+      clearUpload () {
+        // 清空选择文件
+        this.fileList = []
+      },
+      getHistory () {
+        // 查看历史文件记录
+        let _vue = this
+        $.ajax({
+          headers: {
+            'Authorization': 'Bearer ' + this.userToken
+          },
+          url: this.serverUrl + '/api/v1.0/fileUpload/file/findWeekFile',
+          type: 'GET',
+          contentType: 'application/json',
+          success: function(res) {
+            console.log(res.data)
+            _vue.historyFileList = res.data || []
+            if (_vue.historyFileList.length > 0) {
+              // 格式化文件名和上传时间
+              for (let i = 0; i < _vue.historyFileList.length; i++) {
+                let item = _vue.historyFileList[i]
+                item.frtTime = new Date(item.createTime).toLocaleDateString() + new Date(item.createTime).toLocaleTimeString()
+                let tmp = item.fileName
+                let index_1 = tmp.lastIndexOf('.')
+                let fileName = tmp.substring(0, index_1)
+                let suffixName = tmp.substring(index_1 + 1, tmp.length)
+                let index_2 = fileName.lastIndexOf('_')
+                item.frtName = fileName.substring(0, index_2) + '.' + suffixName
+              }
+            }
+          },
+          error: function() {
+            console.log('查询失败')
+          }
+        })
+        this.showDialog = true
+      }
+    }
+  })
+</script>
+<style>
+  .upload-container {
+    max-width: 600px;
+    margin: 20px auto;
+    text-align: center;
+  }
+  .submit {
+    margin-left: 20px;
+  }
+  .tip {
+    font-size: 14px;
+    margin: 15px 0;
+    color: #909399;
+  }
+  .tip.hide {
+    visibility: hidden;
+  }
+  .el-upload-list {
+    text-align: left;
+    padding-left: 30px;
+  }
+  .el-icon-close {
+    display: none !important;
+  }
+  .history-item {
+    margin-bottom: 5px;
+    display: flex;
+    flex-direction: row;
+  }
+  .history-item .file-name {
+    flex: 1;
+  }
+  .history-item .time {
+    color: #999;
+    margin-left: 20px;
+  }
+</style>
+</html>

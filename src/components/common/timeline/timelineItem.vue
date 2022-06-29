@@ -1,0 +1,18 @@
+<template>
+  <div>
+    <li class="timeline-item" :style="itemStyle">
+      <div class="timeline-circle" :class="slotClass" :style="circleStyle" ref="others">
+        <slot name="others" />
+      </div>
+      <slot />
+    </li>
+  </div>
+</template>
+
+<script>
+import timelineItemBase from '@/components/common/timeline/timelineItemBase'
+
+export default {
+  extends: timelineItemBase
+}
+</script>
